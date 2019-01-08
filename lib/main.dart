@@ -20,7 +20,7 @@ class MyAppState extends State<MyApp> {
   MyAppState() {
     SharedPreferences.getInstance().then((SharedPreferences prefs) {
       SmaSDK sdk = SmaSDK(
-          baseUrl: "http://192.168.1.58:8000",
+          baseUrl: "http://192.168.86.31:8000",
           clientId: "1",
           clientSecret: "gZU2EAUZo4tlKaanBl8zvrb8n6DZNsBoMTMyqUO7");
 
@@ -50,6 +50,10 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<bool> _addMessage(Message message) async {
+    if(message.message.length <= 0) {
+      return false;
+    }
+
     try {
       Message storedMessage = await _sdk.storeMessage(message);
 
@@ -71,6 +75,11 @@ class MyAppState extends State<MyApp> {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.red,
+        backgroundColor: Colors.white10,
+        cardColor: Colors.white12,
+        accentColor: Colors.accents[0],
+        brightness: Brightness.dark,
+        primaryColor: Colors.red
       ),
       home: MyHomePage(_addMessage, _messages),
     );
@@ -86,6 +95,7 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
         title: Text("Secure Messaging App"),
       ),
@@ -94,10 +104,15 @@ class MyHomePage extends StatelessWidget {
             child: Icon(Icons.add),
             onPressed: () {
               Scaffold.of(context).showBottomSheet((BuildContext context) {
-                return CreateMessageCard((Message message) {
-                  Navigator.of(context).pop();
+                return CreateMessageCard((Message message) async {
+                  bool success = await _onNewMessage(message);
 
-                  return _onNewMessage(message);
+                  if(success) {
+                    Scaffold.of(context).showSnackBar(SnackBar(content: Text("Bericht opgeslagen")));
+                    Navigator.of(context).pop();
+                  }
+
+                  return success;
                 });
               });
             });
