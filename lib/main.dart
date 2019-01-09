@@ -76,7 +76,7 @@ class MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.red,
         backgroundColor: Colors.white10,
-        cardColor: Color.fromRGBO(48, 48, 48, 1),
+        cardColor: Color.fromRGBO(38, 38, 38, 1),
         accentColor: Colors.accents[0],
         brightness: Brightness.dark,
         canvasColor: Colors.transparent
