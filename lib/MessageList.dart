@@ -3,18 +3,20 @@ import 'package:sma/MessageCard.dart';
 import 'package:smaSDK/SmaSDK.dart';
 
 class MessageList extends StatelessWidget {
-  final Map<int, Message> _messages;
+  final Map<String, Message> _messages;
+  final void Function(String, BuildContext) _removeMessage;
 
-  MessageList(this._messages);
+  MessageList(this._messages, this._removeMessage);
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      children: _buildRows(),
+      shrinkWrap: true,
+      children: _buildRows(context),
     );
   }
 
-  List<Widget> _buildRows() {
+  List<Widget> _buildRows(context) {
     List<Widget> rows = [];
 
     if (_messages.length == 0) {
@@ -28,7 +30,9 @@ class MessageList extends StatelessWidget {
     }
 
     _messages.forEach((key, message) {
-      rows.add(MessageCard(message));
+      rows.add(
+        Dismissible(key: Key(key), child: MessageCard(message), onDismissed: (DismissDirection dismissDirection) => _removeMessage(key, context), direction: DismissDirection.startToEnd,)
+      );
     });
 
     return rows;
