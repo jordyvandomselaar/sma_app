@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sma/AppConfig.dart';
@@ -21,11 +22,13 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   SmaSDK _sdk;
   Map<String, Message> _messages = Map();
-   LocalStorage _storage;
+  LocalStorage _storage;
   MessagesRepository _messagesRepository;
 
-  MyAppState(BuildContext context){
-    _storage = LocalStorage(AppConfig.of(context).localStorageKey);
+  MyAppState(BuildContext context) {
+    _storage = LocalStorage(AppConfig
+        .of(context)
+        .localStorageKey);
   }
 
   initState() {
@@ -46,9 +49,15 @@ class MyAppState extends State<MyApp> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     SmaSDK sdk = SmaSDK(
-        baseUrl: AppConfig.of(context).apiUrl,
-        clientId: AppConfig.of(context).clientId,
-        clientSecret: AppConfig.of(context).clientSecret);
+        baseUrl: AppConfig
+            .of(context)
+            .apiUrl,
+        clientId: AppConfig
+            .of(context)
+            .clientId,
+        clientSecret: AppConfig
+            .of(context)
+            .clientSecret);
 
     var accessToken = prefs.get("access_token");
 
@@ -99,10 +108,17 @@ class MyAppState extends State<MyApp> {
         .showSnackBar(SnackBar(content: Text("Bericht verwijderd")));
   }
 
+  void copyToClipboard(BuildContext context, String field,  String data) {
+    Clipboard.setData(ClipboardData(text: data));
+    Scaffold.of(context).showSnackBar(SnackBar(content: Text("$field is gekopieerd naar je klembord")));
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: AppConfig.of(context).appName,
+      title: AppConfig
+          .of(context)
+          .appName,
       theme: ThemeData(
           primarySwatch: Colors.red,
           backgroundColor: Colors.white10,
@@ -110,24 +126,46 @@ class MyAppState extends State<MyApp> {
           accentColor: Colors.accents[0],
           brightness: Brightness.dark,
           canvasColor: Colors.transparent),
-      home: MyHomePage(_addMessage, _messages, _removeMessage),
+      home: MyHomePage(
+        messages: _messages,
+        onNewMessage: _addMessage,
+        removeMessage: _removeMessage,
+        onMessagePress: copyToClipboard,
+        onUrlPress: copyToClipboard,
+        onPasswordPress: copyToClipboard,
+      ),
     );
   }
 }
 
 class MyHomePage extends StatelessWidget {
-  final Future<bool> Function(Message message) _onNewMessage;
-  final Map<String, Message> _messages;
-  final void Function(String, BuildContext) _removeMessage;
+  final Future<bool> Function(Message message) onNewMessage;
+  final Map<String, Message> messages;
+  final void Function(String, BuildContext) removeMessage;
+  final void Function(BuildContext context, String field, String message)
+  onMessagePress;
+  final void Function(BuildContext context, String field, String link)
+  onUrlPress;
+  final void Function(BuildContext context, String field, String password)
+  onPasswordPress;
 
-  MyHomePage(this._onNewMessage, this._messages, this._removeMessage);
+  MyHomePage({@required this.onNewMessage,
+    @required this.messages,
+    @required this.removeMessage,
+    @required this.onMessagePress,
+    @required this.onUrlPress,
+    @required this.onPasswordPress});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme
+            .of(context)
+            .backgroundColor,
         appBar: AppBar(
-          title: Text("Secure Messaging App"),
+          title: Text(AppConfig
+              .of(context)
+              .appName),
         ),
         floatingActionButton: Builder(builder: (BuildContext context) {
           return FloatingActionButton(
@@ -135,7 +173,7 @@ class MyHomePage extends StatelessWidget {
               onPressed: () {
                 Scaffold.of(context).showBottomSheet((BuildContext context) {
                   return CreateMessageCard((Message message) async {
-                    bool success = await _onNewMessage(message);
+                    bool success = await onNewMessage(message);
 
                     if (success) {
                       Scaffold.of(context).showSnackBar(
@@ -150,7 +188,13 @@ class MyHomePage extends StatelessWidget {
         }),
         body: Padding(
           padding: EdgeInsets.all(10),
-          child: MessageList(_messages, _removeMessage),
+          child: MessageList(
+            messages: messages,
+            removeMessage: removeMessage,
+            onMessagePress: onMessagePress,
+            onUrlPress: onUrlPress,
+            onPasswordPress: onPasswordPress,
+          ),
         ));
   }
 }
