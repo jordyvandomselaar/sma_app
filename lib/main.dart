@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sma/AppConfig.dart';
 import 'package:sma/CreateMessageCard.dart';
 import 'package:sma/MessageList.dart';
 import 'package:sma/Repositories/MessagesRepository.dart';
 import 'package:smaSDK/SmaSDK.dart';
 
-void main() => runApp(MyApp());
-
 class MyApp extends StatefulWidget {
+  final BuildContext context;
+
+  MyApp(this.context);
+
   @override
   State createState() {
-    return MyAppState();
+    return MyAppState(context);
   }
 }
 
 class MyAppState extends State<MyApp> {
   SmaSDK _sdk;
   Map<String, Message> _messages = Map();
-  final LocalStorage _storage = new LocalStorage('some_key');
+   LocalStorage _storage;
   MessagesRepository _messagesRepository;
+
+  MyAppState(BuildContext context){
+    _storage = LocalStorage(AppConfig.of(context).localStorageKey);
+  }
 
   initState() {
     super.initState();
@@ -39,9 +46,9 @@ class MyAppState extends State<MyApp> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     SmaSDK sdk = SmaSDK(
-        baseUrl: "http://192.168.86.31:8000",
-        clientId: "1",
-        clientSecret: "Qed8wakGuCyg5li3zB1TPIa23p0N6TXCISlrzUuy");
+        baseUrl: AppConfig.of(context).apiUrl,
+        clientId: AppConfig.of(context).clientId,
+        clientSecret: AppConfig.of(context).clientSecret);
 
     var accessToken = prefs.get("access_token");
 
@@ -95,7 +102,7 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: AppConfig.of(context).appName,
       theme: ThemeData(
           primarySwatch: Colors.red,
           backgroundColor: Colors.white10,
