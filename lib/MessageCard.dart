@@ -25,7 +25,7 @@ class MessageCard extends StatelessWidget {
               padding: EdgeInsets.all(10),
               child: Column(children: <Widget>[
                 Padding(
-                  child: Text("Je bericht",
+                  child: Text("Je bericht - ${message.createdAt.day.toString().padLeft(2, '0')}-${message.createdAt.month.toString().padLeft(2, '0')}-${message.createdAt.year.toString()} ${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')}",
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                   padding: EdgeInsets.only(bottom: 10),
